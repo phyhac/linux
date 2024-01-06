@@ -142,3 +142,8 @@ config KVM_EXTERNAL_WRITE_TRACKING
 	bool
 
 endif # VIRTUALIZATION
+
+config KVM_USER_HYPERCALL
+	bool "Allow hypercall for userspace program"
+	default y
+	depends on KVM && KVM_INTEL

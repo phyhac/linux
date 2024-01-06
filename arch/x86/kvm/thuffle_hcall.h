@@ -1,0 +1,11 @@
+#ifndef __THUFFLE_HCALL_H
+#define __THUFFLE_HCALL_H
+
+#define HCALL_RAX_ID 0x1d08aa3e
+#define HCALL_EXIT_REASON 0x033f355d
+#define KVM_EXIT_HCALL HCALL_EXIT_REASON
+
+#define HCALL_SUCCESS 0x2be98adc
+#define HCALL_INVAL 0xb614e7a
+
+#endif /* __THUFFLE_HCALL_H */

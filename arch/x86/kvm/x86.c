@@ -32,6 +32,10 @@
 #include "xen.h"
 #include "smm.h"
 
+#ifdef CONFIG_KVM_USER_HYPERCALL
+#include "thuffle_hcall.h"
+#endif
+
 #include <linux/clocksource.h>
 #include <linux/interrupt.h>
 #include <linux/kvm.h>
@@ -9626,6 +9630,21 @@ int kvm_emulate_hypercall(struct kvm_vcpu *vcpu)
 		a3 &= 0xFFFFFFFF;
 	}
 
+#ifdef CONFIG_KVM_USER_HYPERCALL
+	// Hypercall
+	if (nr == HCALL_RAX_ID) {
+		vcpu->run->hypercall.nr = HCALL_RAX_ID;
+		vcpu->run->exit_reason = HCALL_EXIT_REASON;
+		vcpu->run->hypercall.args[0] = a0;
+		vcpu->run->hypercall.args[1] = a1;
+		vcpu->run->hypercall.args[2] = a2;
+		vcpu->run->hypercall.args[3] = a3;
+		printk(KERN_INFO "kvm: thuffle user hypercall"
+			   "(%lx, %lx, %lx, %lx)\n", a0, a1, a2, a3);
+		return 0;
+	}
+#endif
+
 	if (static_call(kvm_x86_get_cpl)(vcpu) != 0) {
 		ret = -KVM_EPERM;
 		goto out;
@@ -10847,7 +10866,7 @@ int kvm_arch_vcpu_ioctl_run(struct kvm_vcpu *vcpu)
 			goto out;
 		}
 		/*
-		 * It should be impossible for the hypervisor timer to be in
+		 * It should be impossib	le for the hypervisor timer to be in
 		 * use before KVM has ever run the vCPU.
 		 */
 		WARN_ON_ONCE(kvm_lapic_hv_timer_in_use(vcpu));
